@@ -22,8 +22,12 @@ env:
     availability:
       - RUNTIME
 
-  # Secrets — set these via Firebase Console → App Hosting → your backend → Secrets
-  # or run: firebase apphosting:secrets:set SECRET_NAME
+  - variable: GMAIL_USER
+    value: yogeshcoldstorage@gmail.com
+    availability:
+      - RUNTIME
+
+  # Required secrets — must exist in Firebase Secret Manager
   - variable: FIREBASE_PROJECT_ID
     secret: FIREBASE_PROJECT_ID
 
@@ -38,15 +42,3 @@ env:
 
   - variable: ADMIN_SECRET_TOKEN
     secret: ADMIN_SECRET_TOKEN
-
-  - variable: RESEND_API_KEY
-    secret: RESEND_API_KEY
-
-  - variable: GMAIL_USER
-    secret: GMAIL_USER
-
-  - variable: GMAIL_APP_PASSWORD
-    secret: GMAIL_APP_PASSWORD
-
-  - variable: GOOGLE_SHEET_WEBHOOK_URL
-    secret: GOOGLE_SHEET_WEBHOOK_URL
