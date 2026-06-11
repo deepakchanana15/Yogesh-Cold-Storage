@@ -1,0 +1,52 @@
+runConfig:
+  minInstances: 0
+  maxInstances: 10
+  concurrency: 80
+  cpu: 1
+  memoryMiB: 512
+
+env:
+  - variable: NEXT_PUBLIC_SITE_URL
+    value: https://yogesh-cold-store.web.app
+    availability:
+      - BUILD
+      - RUNTIME
+
+  - variable: OWNER_EMAIL
+    value: yogeshcoldstorage@gmail.com
+    availability:
+      - RUNTIME
+
+  - variable: RESEND_FROM_EMAIL
+    value: noreply@yogeshcoldstorage.com
+    availability:
+      - RUNTIME
+
+  # Secrets — set these via Firebase Console → App Hosting → your backend → Secrets
+  # or run: firebase apphosting:secrets:set SECRET_NAME
+  - variable: FIREBASE_PROJECT_ID
+    secret: FIREBASE_PROJECT_ID
+
+  - variable: FIREBASE_CLIENT_EMAIL
+    secret: FIREBASE_CLIENT_EMAIL
+
+  - variable: FIREBASE_PRIVATE_KEY
+    secret: FIREBASE_PRIVATE_KEY
+
+  - variable: ADMIN_PASSWORD
+    secret: ADMIN_PASSWORD
+
+  - variable: ADMIN_SECRET_TOKEN
+    secret: ADMIN_SECRET_TOKEN
+
+  - variable: RESEND_API_KEY
+    secret: RESEND_API_KEY
+
+  - variable: GMAIL_USER
+    secret: GMAIL_USER
+
+  - variable: GMAIL_APP_PASSWORD
+    secret: GMAIL_APP_PASSWORD
+
+  - variable: GOOGLE_SHEET_WEBHOOK_URL
+    secret: GOOGLE_SHEET_WEBHOOK_URL
