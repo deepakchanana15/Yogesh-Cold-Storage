@@ -1,19 +1,14 @@
 import { Inquiry } from './firebase-admin';
 
-const WEBHOOK_URL = process.env.GOOGLE_SHEET_WEBHOOK_URL || '';
-
 interface SheetsResult {
   success: boolean;
   error?: string;
 }
 
-/**
- * Write a single inquiry row to Google Sheets via Apps Script webhook.
- * This is fire-and-forget from the API route's perspective —
- * Firestore is already saved before this runs. A failure here is logged
- * but does not affect the response sent to the user.
- */
 export async function syncToSheets(inquiry: Inquiry, timestamp: string): Promise<SheetsResult> {
+  // Read at request time so the env var is always current
+  const WEBHOOK_URL = process.env.GOOGLE_SHEET_WEBHOOK_URL || '';
+
   if (!WEBHOOK_URL) {
     console.warn('[Sheets] GOOGLE_SHEET_WEBHOOK_URL is not set — skipping sync.');
     return { success: false, error: 'Webhook URL not configured' };
