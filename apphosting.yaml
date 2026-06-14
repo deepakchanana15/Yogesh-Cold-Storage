@@ -7,7 +7,7 @@ runConfig:
 
 env:
   - variable: NEXT_PUBLIC_SITE_URL
-    value: https://yogesh-cold-store.web.app
+    value: https://yogeshcoldstorage.com
     availability:
       - BUILD
       - RUNTIME
@@ -21,24 +21,3 @@ env:
     value: noreply@yogeshcoldstorage.com
     availability:
       - RUNTIME
-
-  - variable: GMAIL_USER
-    value: yogeshcoldstorage@gmail.com
-    availability:
-      - RUNTIME
-
-  # Required secrets — must exist in Firebase Secret Manager
-  - variable: FIREBASE_PROJECT_ID
-    secret: FIREBASE_PROJECT_ID
-
-  - variable: FIREBASE_CLIENT_EMAIL
-    secret: FIREBASE_CLIENT_EMAIL
-
-  - variable: FIREBASE_PRIVATE_KEY
-    secret: FIREBASE_PRIVATE_KEY
-
-  - variable: ADMIN_PASSWORD
-    secret: ADMIN_PASSWORD
-
-  - variable: ADMIN_SECRET_TOKEN
-    secret: ADMIN_SECRET_TOKEN
