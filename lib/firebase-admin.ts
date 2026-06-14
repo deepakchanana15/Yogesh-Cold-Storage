@@ -1,36 +1,42 @@
-import { getApps, initializeApp, cert } from 'firebase-admin/app';
+import { getApps, initializeApp, cert, applicationDefault } from 'firebase-admin/app';
 import { getFirestore, Firestore } from 'firebase-admin/firestore';
-
-// ── Lazy singleton — never initialises at module load time ───────────────────
-// This prevents build-time crashes when credentials aren't in .env.local yet.
 
 let _db: Firestore | null = null;
 
 export function getAdminDb(): Firestore {
   if (_db) return _db;
 
-  // Re-use existing app if already initialised (e.g. hot reload in dev)
   if (getApps().length === 0) {
     const projectId   = process.env.FIREBASE_PROJECT_ID;
     const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
     const privateKey  = process.env.FIREBASE_PRIVATE_KEY;
 
-    if (!projectId || !clientEmail || !privateKey) {
-      throw new Error(
-        '[Firebase Admin] Missing credentials. ' +
-        'Add FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, and FIREBASE_PRIVATE_KEY to .env.local\n' +
-        'See FIREBASE_SETUP.md for instructions.'
-      );
-    }
+    // Clean up private key: strip outer quotes and convert escaped newlines
+    const cleanKey = privateKey
+      ? privateKey.replace(/^["']|["']$/g, '').replace(/\\n/g, '\n')
+      : '';
 
-    initializeApp({
-      credential: cert({
-        projectId,
-        clientEmail,
-        // Service account keys use literal \n — convert to real newlines
-        privateKey: privateKey.replace(/\\n/g, '\n'),
-      }),
-    });
+    const hasExplicitCreds = clientEmail && cleanKey.includes('BEGIN');
+
+    if (hasExplicitCreds) {
+      // Use service account credentials (local dev with .env.local)
+      initializeApp({
+        credential: cert({
+          projectId:   projectId!,
+          clientEmail: clientEmail!,
+          privateKey:  cleanKey,
+        }),
+      });
+      console.log('[Firebase Admin] Initialised with service account credentials');
+    } else {
+      // Application Default Credentials — works automatically on Firebase App Hosting
+      // The backend service account has Firestore access within the same project
+      initializeApp({
+        credential: applicationDefault(),
+        projectId:  projectId || process.env.GCLOUD_PROJECT || process.env.GOOGLE_CLOUD_PROJECT,
+      });
+      console.log('[Firebase Admin] Initialised with Application Default Credentials');
+    }
   }
 
   _db = getFirestore();
@@ -56,7 +62,7 @@ export interface Inquiry {
   storageRequirement: string;
   duration: string;
   message: string;
-  createdAt: string;       // ISO string
+  createdAt: string;
   status: InquiryStatus;
   source: string;
 }
