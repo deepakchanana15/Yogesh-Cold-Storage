@@ -4,20 +4,3 @@ runConfig:
   concurrency: 80
   cpu: 1
   memoryMiB: 512
-
-env:
-  - variable: NEXT_PUBLIC_SITE_URL
-    value: https://yogeshcoldstorage.com
-    availability:
-      - BUILD
-      - RUNTIME
-
-  - variable: OWNER_EMAIL
-    value: yogeshcoldstorage@gmail.com
-    availability:
-      - RUNTIME
-
-  - variable: RESEND_FROM_EMAIL
-    value: noreply@yogeshcoldstorage.com
-    availability:
-      - RUNTIME
