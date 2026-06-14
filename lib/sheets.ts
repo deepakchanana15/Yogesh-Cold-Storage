@@ -6,7 +6,6 @@ interface SheetsResult {
 }
 
 export async function syncToSheets(inquiry: Inquiry, timestamp: string): Promise<SheetsResult> {
-  // Read at request time so the env var is always current
   const WEBHOOK_URL = process.env.GOOGLE_SHEET_WEBHOOK_URL || '';
 
   if (!WEBHOOK_URL) {
@@ -28,23 +27,44 @@ export async function syncToSheets(inquiry: Inquiry, timestamp: string): Promise
     source:             inquiry.source,
   };
 
+  const body = JSON.stringify(payload);
+  const headers = { 'Content-Type': 'application/json' };
+
   try {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 8000); // 8 s timeout
+    const timeout = setTimeout(() => controller.abort(), 10000);
 
-    const res = await fetch(WEBHOOK_URL, {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify(payload),
-      signal:  controller.signal,
+    // Step 1: POST with redirect:manual so we can follow it as POST (not GET)
+    // Google Apps Script returns a 302 redirect; default fetch converts POST→GET
+    // which loses the body and causes a 401. We follow it manually as POST.
+    const initial = await fetch(WEBHOOK_URL, {
+      method: 'POST',
+      headers,
+      body,
+      signal: controller.signal,
+      redirect: 'manual',
     });
+
+    let res = initial;
+
+    if (initial.status >= 300 && initial.status < 400) {
+      const location = initial.headers.get('location');
+      if (location) {
+        res = await fetch(location, {
+          method: 'POST',
+          headers,
+          body,
+          signal: controller.signal,
+        });
+      }
+    }
 
     clearTimeout(timeout);
 
     if (!res.ok) {
       const text = await res.text();
-      console.error('[Sheets] Webhook responded with error:', res.status, text);
-      return { success: false, error: `HTTP ${res.status}: ${text}` };
+      console.error('[Sheets] Webhook responded with error:', res.status, text.slice(0, 200));
+      return { success: false, error: `HTTP ${res.status}` };
     }
 
     console.log('[Sheets] Row written successfully for:', inquiry.name);
